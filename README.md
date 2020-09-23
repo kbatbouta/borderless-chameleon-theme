@@ -1,5 +1,14 @@
 # Adapting the browser toolbar based on web sites & an user experience experiment for Firefox
 
+**Fork Note:**
+
+This is a fork of [linonetwo's version](https://github.com/linonetwo/browser-adaptation-dynamic-theme) with the following changes:
+
+  - Remove the active tab line color
+  - Make the frame color a bit darker, so the active tab will be more visible
+
+It's too opinionated to be a PR, so I just keep it here.
+
 ---
 
 There are PRs haven't been merged for a long time, so I fork the original repo, and republish it for myself.
@@ -48,7 +57,7 @@ This dynamic theme adapts the browser main theme (toolbar) to web sites or conte
 
 This can be a complex discussion exactly because the user needs a resting place, a place to be safe when navigating the web. Since the user can eventually stumble in malicious web content, there is always the question about how the browser interfaces endorses the content.
 
-Nevertheless, this project is here so we can explore the good opportunities, first. Can we imagine a safe web and if so would it make sense to have the browser fully adapt to the site? Of course, once you allow yourself to reason about that; it's of course quite important to reason about the negative aspects as well.  
+Nevertheless, this project is here so we can explore the good opportunities, first. Can we imagine a safe web and if so would it make sense to have the browser fully adapt to the site? Of course, once you allow yourself to reason about that; it's of course quite important to reason about the negative aspects as well.
 
 ## Collateral intentions of the project
 
@@ -118,6 +127,6 @@ My first naive thought was — oh, after about 10 years without visiting Add-ons
 
 But a less naive reflection is more like a subtle proposition — could Add-ons become a place for scaling extensions and ideas? what UI elements and social network key indicators could help to better match tests, usage, feedback, discussions around the development for next generation features?
 
-A lot of developers, specially within the Mozilla realm, really understand that Add-on space have always served the purpose of evolving Firefox — however in a chaotic way — which Mozilla always benefited even if one or other developer-user had no idea how they have participated in the chain.  
+A lot of developers, specially within the Mozilla realm, really understand that Add-on space have always served the purpose of evolving Firefox — however in a chaotic way — which Mozilla always benefited even if one or other developer-user had no idea how they have participated in the chain.
 
 I wonder if it would be possible to better integrate Add-ons, APIs, tests and the community to improve how new UX insights could be evaluated and evolve.

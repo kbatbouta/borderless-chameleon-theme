@@ -1,8 +1,8 @@
 {
-  "description": "Chameleon Dynamic Theme (fixed)",
-  "homepage_url": "https://github.com/linonetwo/browser-adaptation-dynamic-theme",
+  "description": "Chameleon Dynamic Theme (forked)",
+  "homepage_url": "https://github.com/huytd/browser-adaptation-dynamic-theme",
   "manifest_version": 2,
-  "name": "Chameleon Dynamic Theme (fixed)",
+  "name": "Chameleon Dynamic Theme (forked)",
   "permissions": [
     "tabs",
     "storage",
