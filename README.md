@@ -4,8 +4,8 @@
 
 This is a fork of [linonetwo's version](https://github.com/linonetwo/browser-adaptation-dynamic-theme) with the following changes:
 
-  - Remove the active tab line color
   - Make the frame color a bit darker, so the active tab will be more visible
+  - Make address bar match the color of toolbar
 
 It's too opinionated to be a PR, so I just keep it here.
 

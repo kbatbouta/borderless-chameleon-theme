@@ -217,7 +217,7 @@ function util_themePackage(color) {
 
   // http://stackoverflow.com/a/3943023/112731
   let textC = (color.r * 0.299 + color.g * 0.587 + color.b * 0.114) > 186 ? 0 : 255;
-  let adjust = -20;
+  let adjust = -25;
 
   const backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`;
   const dimmedBackgroundColor = `rgba(${color.r + adjust}, ${color.g + adjust}, ${color.b + adjust}, 1)`;
@@ -230,7 +230,8 @@ function util_themePackage(color) {
     frame: dimmedBackgroundColor,
     tab_background_text   : textColor,
     toolbar     : backgroundColor,
-    tab_line: backgroundColor,
+    toolbar_field: backgroundColor,
+    toolbar_field_text: textColor,
     toolbar_bottom_separator : backgroundColor,
   };
   console.log(colorObject);
