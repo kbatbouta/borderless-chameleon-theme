@@ -217,8 +217,10 @@ function util_themePackage(color) {
 
   // http://stackoverflow.com/a/3943023/112731
   let textC = (color.r * 0.299 + color.g * 0.587 + color.b * 0.114) > 186 ? 0 : 255;
+  let adjust = (color.r * 0.299 + color.g * 0.587 + color.b * 0.114) > 186 ? -20 : 20;
 
   const backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`;
+  const activeBackgroundColor = `rgba(${color.r + adjust}, ${color.g + adjust}, ${color.b + adjust}, 1)`;
   const textColor = `rgb(${textC}, ${textC}, ${textC})`;
   let colorObject = {
     sidebar: backgroundColor,
@@ -229,7 +231,8 @@ function util_themePackage(color) {
     tab_background_text   : textColor,
     toolbar     : backgroundColor,
     tab_line    : textColor,
-    toolbar_bottom_separator : backgroundColor
+    toolbar_bottom_separator : backgroundColor,
+    tab_selected: activeBackgroundColor
   };
   console.log(colorObject);
   
