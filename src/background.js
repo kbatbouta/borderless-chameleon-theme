@@ -42,6 +42,9 @@ function updateActiveTab_pageloaded(tabId, changeInfo) {
       function updateTab(tabs) {
         if (tabs[0]) {
           var tabURLkey = tabs[0].url;
+          if(tabURLkey === "about:newtab" || tabURLkey === "about:blank") {
+            return;
+          }
 
           if(pendingApplyColor) {
             indexedStateMap[tabURLkey] = 3;
@@ -64,7 +67,9 @@ function updateActiveTab_pageloaded(tabId, changeInfo) {
 function updateTab(tabs) {
     if (tabs[0]) {
       var tabURLkey = tabs[0].url;
-
+      if(tabURLkey === "about:newtab" || tabURLkey === "about:blank") {
+        return;
+      }
       if(pendingApplyColor) {
         indexedStateMap[tabURLkey] = 3;
         pendingApplyColor = null;

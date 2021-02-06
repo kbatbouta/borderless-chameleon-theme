@@ -1,8 +1,8 @@
 {
-  "description": "Chameleon Dynamic Theme (forked)",
-  "homepage_url": "https://github.com/huytd/browser-adaptation-dynamic-theme",
+  "name": "Borderless Chameleon Theme",
+  "description": "Inspiration from Chameleon Dynamic Theme by Lin Onetwo and Huy Tran which is a fork of. It adds the extra colors from the Borderless White and Borderless Dark themes.",
+  "homepage_url": "https://github.com/andreicristianpetcu/browser-adaptation-dynamic-theme",
   "manifest_version": 2,
-  "name": "Chameleon Dynamic Theme (forked)",
   "permissions": [
     "tabs",
     "storage",
