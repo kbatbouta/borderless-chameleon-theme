@@ -245,6 +245,7 @@ function util_themePackage(color) {
   const backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, 1)`;
   const dimmedBackgroundColor = `rgba(${color.r + adjust}, ${color.g + adjust}, ${color.b + adjust}, 1)`;
   const textColor = `rgb(${textC}, ${textC}, ${textC})`;
+  const transparentTextColor = `rgba(${textC}, ${textC}, ${textC}, 0.25)`;
   let colorObject = {
     bookmark_text: textColor,
     button_background_active: dimmedBackgroundColor,
@@ -267,7 +268,7 @@ function util_themePackage(color) {
     sidebar: backgroundColor,
     tab_background_separator: backgroundColor,
     tab_background_text: textColor,
-    tab_line: textColor,
+    tab_line: transparentTextColor,
     tab_loading: textColor,
     tab_selected: backgroundColor,
     tab_text: textColor,
@@ -281,7 +282,7 @@ function util_themePackage(color) {
     toolbar_field_text_focus: textColor,
     toolbar_field_text: textColor,
     toolbar_field: backgroundColor,
-    toolbar_top_separator: "rgba(255, 255, 255, 0.2)",
+    toolbar_top_separator: transparentTextColor,
     toolbar_vertical_separator: backgroundColor,
     toolbar: backgroundColor
   };
