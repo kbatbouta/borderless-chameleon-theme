@@ -34,6 +34,27 @@ var gettingItem = browser.storage.local.get();
 gettingItem.then(checkStoredSettings, onError);
 
 /* This is more aggressive override..*/
+let isFirstRun = true;
+
+console.log("--- -- -- -- loaded");
+function shouldSkipUrl(url){
+  let log = {
+    isFirstRun,
+    url
+  };
+  let shouldSkip = false;
+  if(url === "about:newtab" || url === "about:blank") {
+    if(isFirstRun) {
+      isFirstRun = false;
+      shouldSkip = false;
+    } else {
+      shouldSkip = true;
+    }
+  }
+  console.log("----------------")
+  console.log({ ...log, shouldSkip });
+  return shouldSkip;
+}
 
 function updateActiveTab_pageloaded(tabId, changeInfo) {
 
@@ -42,7 +63,7 @@ function updateActiveTab_pageloaded(tabId, changeInfo) {
       function updateTab(tabs) {
         if (tabs[0]) {
           var tabURLkey = tabs[0].url;
-          if(tabURLkey === "about:newtab" || tabURLkey === "about:blank") {
+          if(shouldSkipUrl(tabURLkey)) {
             return;
           }
 
@@ -67,7 +88,7 @@ function updateActiveTab_pageloaded(tabId, changeInfo) {
 function updateTab(tabs) {
     if (tabs[0]) {
       var tabURLkey = tabs[0].url;
-      if(tabURLkey === "about:newtab" || tabURLkey === "about:blank") {
+      if(shouldSkipUrl(tabURLkey)) {
         return;
       }
       if(pendingApplyColor) {
@@ -98,12 +119,9 @@ function updateTab(tabs) {
     }
 }
 
-function updateActiveTab(tabId, changeInfo) {
-
-
+function updateActiveTab() {
     var gettingActiveTab = browser.tabs.query({active: true, currentWindow: true});
     gettingActiveTab.then(updateTab);
-    // Testing .. getCurrentThemeInfo();
 }
 
 // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/tabs/captureVisibleTab

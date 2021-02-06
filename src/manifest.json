@@ -9,6 +9,16 @@
     "<all_urls>",
     "theme"
   ],
+  "icons": {
+    "16": "icon-16.png",
+    "19": "icon-19.png",
+    "32": "icon-32.png",
+    "38": "icon-38.png",
+    "48": "icon-48.png",
+    "64": "icon-64.png",
+    "96": "icon-96.png",
+    "128": "icon-128.png"
+  },
   "background": {
     "scripts": ["background.js"]
   },
