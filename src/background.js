@@ -139,7 +139,7 @@ function onCaptured(imageUri) {
     //console.log('image loaded')
     canvasContext.drawImage(image, 0,0);
     canvasData = canvasContext.getImageData(0, 0, 100, 10).data;
-    canvasIndex = 510*4;
+    canvasIndex = 710*4;
 
     let color = {
         r     : canvasData[canvasIndex],

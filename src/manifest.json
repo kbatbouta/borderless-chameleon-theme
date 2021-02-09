@@ -26,16 +26,11 @@
        "page": "options.html",
        "browser_style": true
   },
-  "version": "1.11",
+  "version": "1.12",
   "content_scripts": [
       {
         "matches": ["<all_urls>"],
         "js": ["body.js"]
       }
-  ],
-  "applications": {
-    "gecko": {
-      "strict_min_version": "55.0a2"
-    }
-  }
+  ]
 }
