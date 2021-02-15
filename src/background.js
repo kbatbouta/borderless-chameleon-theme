@@ -15,15 +15,10 @@ var configData = {
 
 function checkStoredSettings(item) {
   if (!item.configData) {
-    console.log("Config: first time initializing in storage...")
     browser.storage.local.set({configData});
   } else {
-    console.log("Config: exists in storage...")
     configData = item.configData;
   }
-
-  console.log("Config settings: " + JSON.stringify(configData));
-
 }
 
 function onError(error) {
@@ -36,12 +31,7 @@ gettingItem.then(checkStoredSettings, onError);
 /* This is more aggressive override..*/
 let isFirstRun = true;
 
-console.log("--- -- -- -- loaded");
 function shouldSkipUrl(url){
-  let log = {
-    isFirstRun,
-    url
-  };
   let shouldSkip = false;
   if(url === "about:newtab" || url === "about:blank") {
     if(isFirstRun) {
@@ -51,15 +41,10 @@ function shouldSkipUrl(url){
       shouldSkip = true;
     }
   }
-  console.log("----------------")
-  console.log({ ...log, shouldSkip });
   return shouldSkip;
 }
 
 function updateActiveTab_pageloaded(tabId, changeInfo) {
-
-      console.log('changeInfo.status', changeInfo.status);
-
       function updateTab(tabs) {
         if (tabs[0]) {
           var tabURLkey = tabs[0].url;
@@ -73,17 +58,14 @@ function updateActiveTab_pageloaded(tabId, changeInfo) {
           }
 
           if(indexedStateMap[tabURLkey] != 3 && changeInfo.status == 'complete') {
-            console.log("Will capture from update = complete: " + indexedStateMap[tabURLkey])
             currentActiveTab = tabURLkey;
             var capturing = browser.tabs.captureVisibleTab();
             capturing.then(onCaptured, onError);
           }
-
         }
       }
       var gettingActiveTab = browser.tabs.query({active: true, currentWindow: true});
       gettingActiveTab.then(updateTab);
-
 }
 function updateTab(tabs) {
     if (tabs[0]) {
@@ -97,7 +79,6 @@ function updateTab(tabs) {
       }
 
       if(tabURLkey in indexedColorMap) {
-        console.log('From the cache: ' + tabURLkey);
         let colorObject = indexedColorMap[tabURLkey];
 
         let color = {
@@ -126,8 +107,6 @@ function updateActiveTab() {
 
 // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/tabs/captureVisibleTab
 function onCaptured(imageUri) {
-  //console.log(imageUri);
-  //console.log('doc is ' + document);
   let canvas = document.createElement('canvas');
   canvas.width  = 100;
   canvas.height = 100;
@@ -136,7 +115,6 @@ function onCaptured(imageUri) {
   let image = document.createElement('img');
 
   image.onload = function() {
-    //console.log('image loaded')
     canvasContext.drawImage(image, 0,0);
     canvasData = canvasContext.getImageData(0, 0, 100, 10).data;
     canvasIndex = 710*4;
@@ -151,7 +129,6 @@ function onCaptured(imageUri) {
     let themeProposal = util_themePackage(color);
 
     if(currentActiveTab) {
-      //console.log('Capturing...')
       indexedColorMap[currentActiveTab] = themeProposal.colors;
     }
 
@@ -171,9 +148,7 @@ function onError(error) {
 function notify(message, sender) {
   if('kind' in message) {
     if(message.kind=='refresh') {
-        //console.log('Config:refresh...');
         function refreshAsync(item) {
-          console.log("Reloading settings");
           configData = item.configData;
           updateActiveTab();
         }
@@ -183,7 +158,6 @@ function notify(message, sender) {
 
     if(message.kind=='theme-color' && message.value) {
         let themeProposal = util_themePackage(util_hexToRgb(message.value));
-        //console.log('Setting index ' + message.value + ' from next page..');
         pendingApplyColor = themeProposal.colors;
         indexedColorMap[sender.tab.url] = pendingApplyColor;
 
@@ -256,7 +230,7 @@ function util_themePackage(color) {
     icons: textColor,
     ntp_background: backgroundColor,
     ntp_text: textColor,
-    popup_border: backgroundColor,
+    popup_border: transparentTextColor,
     popup_highlight_text: dimmedBackgroundColor,
     popup_highlight: textColor,
     popup_text: textColor,
@@ -273,7 +247,7 @@ function util_themePackage(color) {
     tab_selected: backgroundColor,
     tab_text: textColor,
     toolbar_bottom_separator: backgroundColor,
-    toolbar_field_border_focus: dimmedBackgroundColor,
+    toolbar_field_border_focus: transparentTextColor,
     toolbar_field_border: backgroundColor,
     toolbar_field_focus: backgroundColor,
     toolbar_field_highlight_text: textColor,
@@ -302,26 +276,6 @@ function util_themePackage(color) {
   }
 
   return themeProposal;
-}
-
-/*
-  Current theme inspection
-*/
-
-function getStyle(themeInfo)
-{
-  console.log(JSON.stringify(themeInfo));
-  if (themeInfo.colors)
-  {
-    console.log("accent color : " +  themeInfo.colors.accentcolor);
-    console.log("toolbar : " + themeInfo.colors.toolbar);
-  }
-}
-
-async function getCurrentThemeInfo()
-{
-  let themeInfo = await browser.theme.getCurrent();
-  getStyle(themeInfo);
 }
 
 /*
