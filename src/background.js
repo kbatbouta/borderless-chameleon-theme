@@ -142,39 +142,6 @@ function onError(error) {
 }
 
 /*
-  Receiving message from content scripts
-*/
-
-function notify(message, sender) {
-  if('kind' in message) {
-    if(message.kind=='refresh') {
-        function refreshAsync(item) {
-          configData = item.configData;
-          updateActiveTab();
-        }
-        let gettingItem = browser.storage.local.get();
-        gettingItem.then(refreshAsync, onError);
-    }
-
-    if(message.kind=='theme-color' && message.value) {
-        let themeProposal = util_themePackage(util_hexToRgb(message.value));
-        pendingApplyColor = themeProposal.colors;
-        indexedColorMap[sender.tab.url] = pendingApplyColor;
-
-        // update the theme, if the message came from the active tab
-        var gettingActiveTab = browser.tabs.query({active: true, currentWindow: true});
-        gettingActiveTab.then(function(activeTabs) {
-          if (activeTabs[0].id === sender.tab.id) {
-            util_custom_update(themeProposal);
-           }
-        });
-    }
-  }
-}
-
-browser.runtime.onMessage.addListener(notify);
-
-/*
    Utils
 */
 
@@ -265,7 +232,6 @@ function util_themePackage(color) {
   let themeProposal = {
     colors : colorObject,
     images : {
-//      headerURL              : 'background.svg',
       additional_backgrounds : [ "background.svg"]
     },
     properties: {
