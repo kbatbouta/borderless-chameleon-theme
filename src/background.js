@@ -165,6 +165,9 @@ function util_custom_update(themeProposal) {
   }
 
   browser.theme.update(themeProposal_copy);
+  // browser.theme.getCurrent().then(theme => {
+  //   console.log(theme);
+  // })
 }
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
@@ -192,7 +195,7 @@ function util_themePackage(color) {
     button_background_active: dimmedBackgroundColor,
     button_background_hover: backgroundColor,
     frame_inactive: backgroundColor,
-    frame: dimmedBackgroundColor,
+    frame: backgroundColor,
     icons_attention: textColor,
     icons: textColor,
     ntp_background: backgroundColor,
@@ -209,9 +212,9 @@ function util_themePackage(color) {
     sidebar: backgroundColor,
     tab_background_separator: backgroundColor,
     tab_background_text: textColor,
-    tab_line: transparentTextColor,
+    tab_line: dimmedBackgroundColor,
     tab_loading: textColor,
-    tab_selected: backgroundColor,
+    tab_selected: transparentTextColor,
     tab_text: textColor,
     toolbar_bottom_separator: backgroundColor,
     toolbar_field_border_focus: transparentTextColor,
@@ -219,11 +222,10 @@ function util_themePackage(color) {
     toolbar_field_focus: backgroundColor,
     toolbar_field_highlight_text: textColor,
     toolbar_field_highlight: transparentTextColor,
-    toolbar_field_separator: "rgba(255, 255, 255, 0)",
     toolbar_field_text_focus: textColor,
     toolbar_field_text: textColor,
     toolbar_field: backgroundColor,
-    toolbar_top_separator: transparentTextColor,
+    toolbar_top_separator: backgroundColor,
     toolbar_vertical_separator: backgroundColor,
     toolbar: backgroundColor
   };
