@@ -1,5 +1,10 @@
+/* consts */
+
+const regexpRGBA = /(?<red>[0-9]+(\.[0-9]+)?)\s*,\s*(?<green>[0-9]+(\.[0-9]+)?)\s*,\s*(?<blue>[0-9]+(\.[0-9]+)?)(\s*,\s*(?<alpha>[0-9]+(\.[0-9]+)?))?/mg;
+
+/* variables */
+
 let indexedColorMap   = new Array();
-let indexedStateMap   = new Array();
 let currentActiveTab  = null;
 let pendingApplyColor = null;
 
@@ -44,59 +49,79 @@ function shouldSkipUrl(url){
   return shouldSkip;
 }
 
-function updateActiveTab_pageloaded(tabId, changeInfo) {
-      function updateTab(tabs) {
-        if (tabs[0]) {
-          var tabURLkey = tabs[0].url;
-          if(shouldSkipUrl(tabURLkey)) {
+function captureColor(tabs) {
+  if (tabs[0]) {
+    var tabURLKey = tabs[0].url;
+    var tabId = tabs[0].id;
+    // console.log(`[IMPORTANT] capturing color for ${tabURLKey}`);
+
+    function executed(results) {
+      if (results[0]) {
+        try{
+          // console.log(`Error: got result back and it is ${results[0]}`);
+          var color = util_parseColor(results[0]);
+          if (color != null) {
+            let theme = util_themePackage(color);
+            indexedColorMap[tabURLKey] = {
+              theme : theme,
+              color : color,
+              time : Date.now()
+            };
+            util_custom_update(theme);
             return;
           }
-
-          if(pendingApplyColor) {
-            indexedStateMap[tabURLkey] = 3;
-            pendingApplyColor = null;
-          }
-
-          if(indexedStateMap[tabURLkey] != 3 && changeInfo.status == 'complete') {
-            currentActiveTab = tabURLkey;
-            var capturing = browser.tabs.captureVisibleTab();
-            capturing.then(onCaptured, onError);
-          }
+        } catch(er) {
+          console.log(`Error: ${er}`);
+          // will fallback to image capture on parsing errors.
         }
       }
-      var gettingActiveTab = browser.tabs.query({active: true, currentWindow: true});
-      gettingActiveTab.then(updateTab);
+      // As a fallback we capture a screen shot of the page and work with that.
+      // (Legacy approach)      
+      currentActiveTab = tabURLKey;
+      browser.tabs.captureVisibleTab().then(onImageCapture, onError);       
+    }
+
+    // we first try to use the meta color-schema color that is provided by the page devs.    
+    browser.tabs.executeScript(tabId, {
+      file: "/content-script.js"    
+    }).then(executed);
+  }
 }
+
+function updateActiveTab_pageloaded(tabId, changeInfo) {
+      function fulfilled(tabs) {                
+        if (tabs[0] && changeInfo.status == 'complete') {
+          updateTab(tabs);
+        }        
+      }
+      var gettingActiveTab = browser.tabs.query({active: true, currentWindow: true});
+      gettingActiveTab.then(fulfilled);
+}
+
 function updateTab(tabs) {
     if (tabs[0]) {
       var tabURLkey = tabs[0].url;
+      // check if we need to skip this page (new age or blank pages)
       if(shouldSkipUrl(tabURLkey)) {
         return;
-      }
-      if(pendingApplyColor) {
-        indexedStateMap[tabURLkey] = 3;
-        pendingApplyColor = null;
-      }
+      }      
 
       if(tabURLkey in indexedColorMap) {
-        let colorObject = indexedColorMap[tabURLkey];
+        let data = indexedColorMap[tabURLkey];
 
-        let color = {
-            r: 0,
-            g: 0,
-            b: 0,
-            alpha: 0
-        };
+        // we apply the theme regardless of its age for a more interactive experience.
+        util_custom_update(data.theme);
 
-        let themeProposal = util_themePackage(color);
-        themeProposal.colors = colorObject;
-        util_custom_update(themeProposal);
-
-      } else {
-        currentActiveTab = tabURLkey;
-        var capturing = browser.tabs.captureVisibleTab();
-        capturing.then(onCaptured, onError);
+        if(Date.now() - data.time < 1800000) {
+          // this theme is still fresh.
+          util_custom_update(data.theme);
+          // console.log(`loaded from cache for ${tabURLkey}`);
+          return;                    
+        }
+        // we recapture the theme every once in a while.
+        delete indexedColorMap[tabURLkey];
       }
+      captureColor(tabs);      
     }
 }
 
@@ -106,7 +131,7 @@ function updateActiveTab() {
 }
 
 // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/tabs/captureVisibleTab
-function onCaptured(imageUri) {
+function onImageCapture(imageUri) {
   let canvas = document.createElement('canvas');
   canvas.width  = 100;
   canvas.height = 100;
@@ -129,7 +154,11 @@ function onCaptured(imageUri) {
     let themeProposal = util_themePackage(color);
 
     if(currentActiveTab) {
-      indexedColorMap[currentActiveTab] = themeProposal.colors;
+      indexedColorMap[currentActiveTab] = {
+        theme : themeProposal,
+        color : color,
+        time : Date.now()
+      };
     }
 
     util_custom_update(themeProposal);
@@ -164,20 +193,107 @@ function util_custom_update(themeProposal) {
     delete themeProposal_copy.colors.tab_line;
   }
 
-  browser.theme.update(themeProposal_copy);
-  // browser.theme.getCurrent().then(theme => {
-  //   console.log(theme);
-  // })
+  browser.theme.update(themeProposal_copy);  
+}
+
+function util_parseColor(str){
+  var s = str.trim();
+  if (s.startsWith("#")) {
+    return util_hexToRgb(str);
+  } else if(s.startsWith("rgb")){   
+    // this is able to parse rgba colors as well. 
+    var match = regexpRGBA.exec(str);
+    if (match) {
+      return {
+        r : parseFloat(match.groups.red),
+        g : parseFloat(match.groups.green),
+        b : parseFloat(match.groups.blue),
+        alpha : match.groups.alpha ? parseFloat(match.groups.alpha) : 1.0,
+      };
+    }
+  }
+  return null; 
 }
 
 // https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 function util_hexToRgb(hex) {
-    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex);
     return result ? {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
+        b: parseInt(result[3], 16),
+        alpha: result[4] ? parseInt(result[4], 16) : 1.0
     } : null;
+}
+
+// https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
+function util_hslToRgb(color) {
+  var h = color.h;
+  var s = color.s;
+  var l = color.l;
+  var r, g, b;
+  var alpha = color.alpha;   
+  if(s == 0){
+      r = g = b = l;
+  }else{
+    var hue2rgb = function hue2rgb(p, q, t){
+      if(t < 0) t += 1;
+      if(t > 1) t -= 1;
+      if(t < 1/6) return p + (q - p) * 6 * t;
+      if(t < 1/2) return q;
+      if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    }
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }  
+  return {
+    r : r * 255,
+    g : g * 255, 
+    b : b * 255,
+    alpha : alpha
+  }
+}
+
+// https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
+function util_rgbToHsl(color){
+  var r = color.r / 255;
+  var g = color.g / 255;
+  var b = color.b / 255;  
+  var alpha = color.alpha;
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, l = (max + min) / 2;
+  if(max == min){
+    h = s = 0; // achromatic
+  }else{
+    var d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch(max){
+      case r: h = (g - b) / d + (g < b ? 6 : 0); 
+      break;
+      case g: h = (b - r) / d + 2; 
+      break;
+      case b: h = (r - g) / d + 4; 
+      break;
+    }
+    h /= 6;
+  }
+  return {
+    h : h,
+    s : s, 
+    l : l,
+    alpha : alpha
+  }
+}
+
+function util_adjustColor(color) {
+  // convert the input rgb color to hsl.
+  let colorHsl = util_rgbToHsl(color);
+  // return the new color in rgb.
+  return util_hslToRgb(colorHsl);
 }
 
 function util_themePackage(color) {
